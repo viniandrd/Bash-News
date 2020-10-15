@@ -8,6 +8,7 @@ import cloudmersive_convert_api_client
 from cloudmersive_convert_api_client.rest import ApiException
 from pprint import pprint
 from buildPDF import create_pdf
+import buildFolders as bf
 
 nltk.download('punkt')
 
@@ -80,6 +81,7 @@ def search(keyword=None, datestart=None, dateend=None):
 
 
 if __name__ == '__main__':
+    bf.createFolder()
     #Caso for testar o código na IDE, definir os parametros de busca aqui.
     keyword = 'NBA'
     initialdate = '10/12/2020'
