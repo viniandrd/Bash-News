@@ -1,11 +1,13 @@
+from __future__ import print_function
 from GoogleNews import GoogleNews
 from newspaper import Article
 from newspaper import Config
 import pandas as pd
-import nltk
-import getopt, sys
-import argparse
-import pdfkit
+import nltk, getopt, sys, argparse, pdfkit, time
+import cloudmersive_convert_api_client
+from cloudmersive_convert_api_client.rest import ApiException
+from pprint import pprint
+from buildPDF import create_pdf
 
 nltk.download('punkt')
 
@@ -14,7 +16,7 @@ config = Config()
 config.browser_user_agent = user_agent
 
 def search(keyword=None, datestart=None, dateend=None):
-    #Parametros
+    #Parametros de busca
     print('Key: ', keyword)
     print('Date start: ', datestart)
     print('Date end: ', dateend)
@@ -31,8 +33,8 @@ def search(keyword=None, datestart=None, dateend=None):
     print(df.head())
 
     #Pega um range de páginas obtidas do resultado acima
-    for i in range(2,3):
-        print(i)
+    for i in range(0,1):
+        print('idx', i)
         googlenews.getpage(i)
         result = googlenews.result()
         df = pd.DataFrame(result)
@@ -47,14 +49,17 @@ def search(keyword=None, datestart=None, dateend=None):
     formated_dateend = dateend.split("/")
     dateend_save = formated_dateend[0] + '-' + formated_dateend[1] + '-' + formated_dateend[2]
 
-    txt = open("{}_{}_{}.txt".format(keyword, datestart_save, dateend_save), 'a')
+    #---Fazendo testes com arquivos de texto
+    #txtfilename = "./txts/sumario.txt"
+    #txt = open(txtfilename, 'w')
 
     for ind in df.index:
-        print(ind)
-        dict = {}
-        article = Article(df['link'][ind],config=config)
-        article.download()
-        try:
+        if(ind < 2):
+            print(ind)
+            dict = {}
+            article = Article(df['link'][ind],config=config)
+            article.download()
+            #try:
             article.parse()
             article.nlp()
             dict['Date'] = df['date'][ind]
@@ -63,44 +68,34 @@ def search(keyword=None, datestart=None, dateend=None):
             dict['Article'] = article.text
             dict['Summary'] = article.summary
             list.append(dict)
-            if(ind < 2):
-                txt.write(article.title)
-                txt.write(article.text)
-                txt.write(article.summary)
-                txt.write('\n')
-                txt.write('EoA')
-                txt.write('\n')
+            resumo = str(article.summary)
+            create_pdf(df['date'][ind], df['media'][ind], article.title, resumo, ind)
+            #except:
+            #    print('error')
+    #txt.close()
 
-        except:
-            print('error')
-    txt.close()
-
-
-    news_df = pd.DataFrame(list)
-
-
-    news_df.to_excel("{}_{}_{}.xlsx".format(keyword, datestart_save, dateend_save))
-
+    #--------Convertendo o DataFrame pra um arquivo do Excel
+    #news_df = pd.DataFrame(list)
+    #news_df.to_excel("{}_{}_{}.xlsx".format(keyword, datestart_save, dateend_save))
 
 
 if __name__ == '__main__':
-    options = {
-        'page-size': 'A4',
-        'margin-top': '0.75in',
-        'margin-right': '0.75in',
-        'margin-bottom': '0.75in',
-        'margin-left': '0.75in',
-    }
-    #pdfkit.from_url('https://globoesporte.globo.com/basquete/nba/noticia/assistencia-magica-de-kawhi-e-recorde-pos-jordan-de-murray-os-destaques-de-domingo-na-nba.ghtml', 'teste.pdf', options=options)
-    pdfkit.from_file('NBA_08-30-2020_08-31-2020.txt', 'teste.pdf')
-    '''"#Pegando as informações da linha de comando (nao necessario caso for rodar direto na IDE)
+    #Caso for testar o código na IDE, definir os parametros de busca aqui.
+    keyword = 'NBA'
+    initialdate = '10/12/2020'
+    finaldate = '10/12/2020'
+
+    #Pegando as informações da linha de comando (nao necessario caso for rodar direto na IDE)
     parser = argparse.ArgumentParser()
     parser.add_argument("-key", "--keyword", help="Database name")
     parser.add_argument("-dts", "--datestart", help="Initial Date")
     parser.add_argument("-dte", "--dateend", help="Final Date")
 
-    args = parser.parse_args()
-    keyword = str(args.keyword)
-    initialdate = str(args.datestart)
-    finaldate = str(args.dateend)
-    search(keyword, initialdate, finaldate)'''
+    if keyword == None and initialdate == None and finaldate == None:
+        args = parser.parse_args()
+        keyword = str(args.keyword)
+        initialdate = str(args.datestart)
+        finaldate = str(args.dateend)
+
+    #Faz a busca pelas notícias
+    search(keyword, initialdate, finaldate)
