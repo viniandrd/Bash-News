@@ -4,6 +4,8 @@ from newspaper import Article
 from newspaper import Config
 import pandas as pd
 import nltk, getopt, sys, argparse, pdfkit, time
+import cloudmersive_convert_api_client
+from cloudmersive_convert_api_client.rest import ApiException
 from pprint import pprint
 from buildPDF import create_pdf
 
@@ -21,7 +23,6 @@ def search(keyword=None, datestart=None, dateend=None):
 
     #Configuração da pesquisa
     googlenews = GoogleNews(start=datestart, end=dateend)
-    googlenews.setlang('pt')
     googlenews.search(keyword)
     result = googlenews.result()
 
@@ -54,25 +55,26 @@ def search(keyword=None, datestart=None, dateend=None):
     # --- Salvando as informações das noticias (summary) em um arquivo de texto
     txt = open(txtfilename, 'w')
     for ind in df.index:
-        print(ind)
-        dict = {}
-        article = Article(df['link'][ind], config=config)
-        article.download()
-        #try:
-        article.parse()
-        article.nlp()
-        dict['Date'] = df['date'][ind]
-        dict['Media'] = df['media'][ind]
-        dict['Title'] = article.title
-        dict['Article'] = article.text
-        dict['Summary'] = article.summary
-        list.append(dict)
-        txt.write(article.summary)
-        #print(list[ind]['Summary'])
-        #txt.write(list[ind])
-        create_pdf(ind, list)
-        #except:
-        #    print('error')
+        if(ind < 2):
+            print(ind)
+            dict = {}
+            article = Article(df['link'][ind], config=config)
+            article.download()
+            try:
+                article.parse()
+                article.nlp()
+                dict['Date'] = df['date'][ind]
+                dict['Media'] = df['media'][ind]
+                dict['Title'] = article.title
+                dict['Article'] = article.text
+                dict['Summary'] = article.summary
+                list.append(dict)
+                txt.write(article.summary)
+                #print(list[ind]['Summary'])
+                #txt.write(list[ind])
+                create_pdf(ind, list)
+            except:
+                print('error')
     txt.close()
 
     #--------Convertendo o DataFrame pra um arquivo do Excel
