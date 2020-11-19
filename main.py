@@ -6,6 +6,7 @@ import pandas as pd
 import nltk, argparse
 from threading import Thread
 import time
+import build_folders as bf
 nltk.download('punkt')
 
 user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'
@@ -99,6 +100,9 @@ def call_create_pdf(list):
 
 
 if __name__ == '__main__':
+    #criação da pasta do dia
+    bf.create_folder()
+
     start_time = time.time()
     # Variáveis globais
     #global noticias
