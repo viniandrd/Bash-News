@@ -1,7 +1,7 @@
 import fpdf
 import build_folders as bf
 from fpdf import FPDF
-fpdf.set_global("SYSTEM_TTFONTS", './fonts')
+fpdf.set_global("SYSTEM_TTFONTS", './fonts/')
 
 header_title = None
 header_date = None
@@ -20,7 +20,7 @@ def create_pdf(idx, dict):
     pdf.add_font("NotoSans", style="BI", fname="NotoSans-BoldItalic.ttf", uni=True)
     #print(content)
     pdf.build(dict)
-    pdf.output(bf.get_folder() + '\\Noticia-{}.pdf'.format(idx), 'F')
+    pdf.output(bf.get_folder() + '/Noticia-{}.pdf'.format(idx), 'F')
 
 
 class PDF(FPDF):

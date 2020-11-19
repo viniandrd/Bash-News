@@ -20,7 +20,7 @@ noticias = []
 cont = 0
 
 
-def search(keyword=None, datestart=None, dateend=None):
+def search(keyword=None, datestart=None, dateend=None, pgs = 1):
     # Variáveis globais
     global noticias
     global cont
@@ -42,7 +42,7 @@ def search(keyword=None, datestart=None, dateend=None):
     print(df.head())
 
     # Pega um range de páginas obtidas do resultado acima
-    for i in range(0,1):
+    for i in range(0,pgs):
         googlenews.getpage(i)
         result = googlenews.result()
         df = pd.DataFrame(result)
@@ -108,19 +108,22 @@ if __name__ == '__main__':
     #global noticias
     #global cont
 
-    keyword = 'Corona Virus'
+    keyword = None
+    qtd_paginas = None
     get_current_date()
 
     #Pegando as informações da linha de comando (nao necessario caso for rodar direto na IDE)
     parser = argparse.ArgumentParser()
     parser.add_argument("-key", "--keyword", help="Keyword")
-
+    parser.add_argument("-pg", "--pages", help="Pages")
     if keyword == None:
         args = parser.parse_args()
         keyword = str(args.keyword)
+        qtd_paginas = int(args.pages)
+
 
     #Faz a busca pelas notícias
-    search(keyword, initialdate, finaldate)
+    search(keyword, initialdate, finaldate, qtd_paginas)
 
     tamanho = len(noticias)
     metade = tamanho // 2
