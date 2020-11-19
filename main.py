@@ -101,7 +101,7 @@ def call_create_pdf(list):
 
 if __name__ == '__main__':
     #criação da pasta do dia
-    bf.create_folder()
+
 
     start_time = time.time()
     # Variáveis globais
@@ -121,6 +121,8 @@ if __name__ == '__main__':
         keyword = str(args.keyword)
         qtd_paginas = int(args.pages)
 
+    bf.set_kw(keyword)
+    bf.create_folder()
 
     #Faz a busca pelas notícias
     search(keyword, initialdate, finaldate, qtd_paginas)
