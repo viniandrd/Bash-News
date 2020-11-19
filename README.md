@@ -10,12 +10,13 @@
 ## DESCRIÇÃO
 
 Com a correria das nossas rotinas diárias, é preciso gastar um tempinho para pesquisar sobre notícias na internet e muitos acabam por não pesquisarem muito sobre as notícias e ficam "desligados" do que está acontecendo. Assim, com o intuito de automatizar essa tarefa para que seja possível ganhar tempo para outras, desenvolveremos um sistema capaz de pesquisar notícias diárias por você e organizá-las de acordo com sua necessidade ou desejo. 
+
 O sistema conta com uma busca de notícias em um intervalo de datas, podendo ser diárias ou até mesmo de anos. Será possível fazer isso com apenas um comando no terminal do sistema operacional. As notícias serão baixadas para o HD e convertidas para um PDF em qualquer pasta qualquer de interesse.
 
 ## REQUISITOS
 
->Python 3
->PIP
+>* Python 3
+>* PIP
 
 ## INSTALAÇÃO
 
@@ -36,3 +37,5 @@ python3 main.py --keyword name --pages n
 >
 > * --pages
 >    * Após o parâmetro --pages digite o número de páginas que devem ser buscadas no google. Obs.: Cada página retorna 10 itens de pesquisa.
+
+Após a execução do script as noticias estarão salvas na pasta *news* dentro da pasta do projeto.
