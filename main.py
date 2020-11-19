@@ -1,19 +1,31 @@
 from GoogleNews import GoogleNews
 from newspaper import Article, Config
-from buildPDF import create_pdf
+from build_pdf import create_pdf
 from datetime import date
 import pandas as pd
 import nltk, argparse
-
-
+from threading import Thread
+import time
 nltk.download('punkt')
 
 user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'
 config = Config()
 config.browser_user_agent = user_agent
 
+# Variáveis globais
+initialdate = None
+finaldate = None
+noticias = []
+cont = 0
+
+
 def search(keyword=None, datestart=None, dateend=None):
-    #Parametros de busca
+    # Variáveis globais
+    global noticias
+    global cont
+    global acabou
+
+    # Parametros de busca
     print('Keyword: ', keyword)
 
     #Configuração da pesquisa
@@ -22,20 +34,19 @@ def search(keyword=None, datestart=None, dateend=None):
     googlenews.search(keyword)
     result = googlenews.result()
 
-    #Passando os dados p/ um DataFrame
+    # Passando os dados p/ um DataFrame
     df = pd.DataFrame(result)
 
-    #Printando as 5 primeiras notícias
+    # Printando as 5 primeiras notícias
     print(df.head())
 
-    #Pega um range de páginas obtidas do resultado acima
+    # Pega um range de páginas obtidas do resultado acima
     for i in range(0,1):
         googlenews.getpage(i)
         result = googlenews.result()
         df = pd.DataFrame(result)
 
-    list = []
-
+    # Converte o DataFrame acima para uma lista de dicionários
     for ind in df.index:
         print('Noticia numero: {}'.format(ind))
         dict = {}
@@ -49,17 +60,17 @@ def search(keyword=None, datestart=None, dateend=None):
             dict['Title'] = article.title
             dict['Article'] = article.text
             dict['Summary'] = article.summary
-            list.append(dict)
-            create_pdf(ind, list)
+            dict['Created'] = False
+            noticias.append(dict)
         except:
             print('Error')
+        time.sleep(0)
 
-    #--------Convertendo o DataFrame pra um arquivo do Excel
-    #news_df = pd.DataFrame(list)
-    #news_df.to_excel("{}_{}_{}.xlsx".format(keyword, datestart_save, dateend_save))
+def get_current_date():
+    # Variáveis globais
+    global initialdate
+    global finaldate
 
-
-if __name__ == '__main__':
     # Pega a data atual para busca de notícias
     today = date.today()
     today = str(today)
@@ -70,10 +81,31 @@ if __name__ == '__main__':
     data_atual = '{}/{}/{}'.format(mes, dia, ano)
 
     # Caso for testar o código na IDE, definir os parametros de busca aqui.
-    keyword = 'Corona Virus'
+
     initialdate = data_atual
     finaldate = data_atual
 
+
+def call_create_pdf(list):
+    global noticias
+    global cont
+
+    for noticia in list:
+        ind = noticias.index(noticia)
+        create_pdf(cont, noticia)
+        cont += 1
+        time.sleep(0)
+    #print('Tempo de execução com threads: {}'.format(time.time() - start_time))
+
+
+if __name__ == '__main__':
+    start_time = time.time()
+    # Variáveis globais
+    #global noticias
+    #global cont
+
+    keyword = 'Corona Virus'
+    get_current_date()
 
     #Pegando as informações da linha de comando (nao necessario caso for rodar direto na IDE)
     parser = argparse.ArgumentParser()
@@ -85,3 +117,20 @@ if __name__ == '__main__':
 
     #Faz a busca pelas notícias
     search(keyword, initialdate, finaldate)
+
+    tamanho = len(noticias)
+    metade = tamanho // 2
+
+    primeira_metade = noticias[:metade]
+    segunda_metade = noticias[metade:]
+
+    print(len(primeira_metade))
+    print(len(segunda_metade))
+
+    th_create = Thread(target=call_create_pdf, args=[primeira_metade])
+    th2_create = Thread(target=call_create_pdf, args=[segunda_metade])
+
+    th_create.start()
+    th2_create.start()
+
+    #print('Tempo de execução com threads: {}'.format(time.time() - start_time))

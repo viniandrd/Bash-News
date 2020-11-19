@@ -12,5 +12,3 @@ def createFolder():
         print("Directory " , dirName ,  " Created ")
     else:
         print("Teste")
-
-
